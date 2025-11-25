@@ -77,6 +77,7 @@ COMMAND_MAP = {
     # Common navigation
     "menu_on": "*menu=on#",
     "menu_off": "*menu=off#",
+    "menu_status": "*menu=?#",
     "enter": "*enter#",
     "up": "*up#",
     "down": "*down#",
@@ -86,6 +87,17 @@ COMMAND_MAP = {
     "keyst_plus": "*keyst=+#",
     "keyst_minus": "*keyst=-#",
     "keyst_status": "*keyst=?#",
+    # Lens shift (lst) and optical controls
+    "lst_up": "*lst=up#",
+    "lst_down": "*lst=down#",
+    "lst_left": "*lst=left#",
+    "lst_right": "*lst=right#",
+    # Focus
+    "focus_plus": "*focus=+#",
+    "focus_minus": "*focus=-#",
+    # Zoom
+    "zoom_plus": "*zoom=+#",
+    "zoom_minus": "*zoom=-#",
 }
 
 # Helper: send a single command and return projector response (string)
@@ -187,6 +199,41 @@ INDEX_HTML = """
     <div class="row">
       <button onclick="sendPreset('ltim')">Lamp Hours</button>
       <button onclick="sendPreset('modelname')">Model Name</button>
+    </div>
+
+    <h3>Menu / Navigation</h3>
+    <div class="row">
+      <button onclick="sendPreset('menu_on')">Menu On</button>
+      <button onclick="sendPreset('menu_off')">Menu Off</button>
+      <button onclick="sendPreset('menu_status')">Menu ?</button>
+    </div>
+    <div class="row">
+      <button onclick="sendPreset('up')">Up</button>
+      <button onclick="sendPreset('down')">Down</button>
+      <button onclick="sendPreset('left')">Left</button>
+      <button onclick="sendPreset('right')">Right</button>
+      <button onclick="sendPreset('enter')">Enter</button>
+    </div>
+
+    <div class="panel">
+      <h3>Lens &amp; Optics</h3>
+      <div class="row">
+        <button onclick="sendPreset('lst_up')">Lens Shift Up</button>
+        <button onclick="sendPreset('lst_down')">Lens Shift Down</button>
+        <button onclick="sendPreset('lst_left')">Lens Shift Left</button>
+        <button onclick="sendPreset('lst_right')">Lens Shift Right</button>
+      </div>
+      <div class="row">
+        <button onclick="sendPreset('focus_plus')">Focus +</button>
+        <button onclick="sendPreset('focus_minus')">Focus -</button>
+        <button onclick="sendPreset('zoom_plus')">Zoom +</button>
+        <button onclick="sendPreset('zoom_minus')">Zoom -</button>
+      </div>
+      <div class="row">
+        <button onclick="sendPreset('keyst_minus')">Keystone -</button>
+        <button onclick="sendPreset('keyst_plus')">Keystone +</button>
+        <button onclick="sendPreset('keyst_status')">Keystone ?</button>
+      </div>
     </div>
 
     <div class="row">
