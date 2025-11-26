@@ -116,70 +116,96 @@ INDEX_HTML = """
     .row { display:flex; gap:8px; margin-bottom:8px; }
     button { padding:8px 12px; }
     select { padding:6px; }
-    #log { white-space: pre-wrap; background:#f7f7f7; padding:10px; border:1px solid #ddd; height:220px; overflow:auto; }
+    /* log height will be flexible to fill the right column */
+    #log { white-space: pre-wrap; background:#f7f7f7; padding:10px; border:1px solid #ddd; overflow:auto; }
     .panel { border:1px solid #ddd; padding:12px; margin-bottom:12px; border-radius:6px; }
     img.manual { max-width:100%; height:auto; border:1px solid #ccc; }
   </style>
 </head>
 <body>
   <h2>BenQ MW853UST - Local Web UI</h2>
-  <div class="panel">
-    <label>Projector IP: <input id="ip" value="{{ default_ip }}"></label>
-    <label>Port: <input id="port" value="{{ default_port }}" style="width:70px"></label>
-    <label><input type="checkbox" id="wrapcr"> Wrap with CR</label>
-    <button id="savecfg">Save</button>
-  </div>
-    <div class="panel">
-      <h3>Documentation</h3>
-      <div class="row">
-        <a href="/manual.pdf"><button>Download RS232 Control Guide (PDF)</button></a>
+
+
+
+
+    <style>
+      /* Two-column layout: controls (left) and log (right). Make the container fill remaining viewport height so the right column can stretch. */
+      .container { display:flex; gap:16px; align-items:stretch; min-height: calc(100vh - 120px); }
+      .left { flex: 1 1 60%; }
+      .right { flex: 0 0 380px; }
+      .right .panel { height:100%; display:flex; flex-direction:column; }
+      #log { flex:1 1 auto; overflow:auto; }
+      /* navigation pad (arrow keys) styling */
+      .nav-pad { display:grid; grid-template-columns: 56px 56px 56px; gap:6px; justify-content:center; align-items:center; margin-top:8px; }
+      .nav-pad button { width:56px; height:40px; }
+      @media (max-width: 900px) { .container { flex-direction:column; min-height: auto; } .right { flex: 1 1 auto; max-width: 100%; } }
+    </style>
+
+    <div class="container">
+      <div class="left">
+        <div class="panel">
+          <label>Projector IP: <input id="ip" value="{{ default_ip }}"></label>
+          <label>Port: <input id="port" value="{{ default_port }}" style="width:70px"></label>
+          <label><input type="checkbox" id="wrapcr"> Wrap with CR</label>
+          <button id="savecfg">Save</button>
+        </div>
+
+        <div class="panel">
+          <h3>Documentation</h3>
+          <div class="row">
+            <a href="/manual.pdf"><button>Download RS232 Control Guide (PDF)</button></a>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="row">
+            <input id="rawcmd" placeholder="Type raw command like *pow=?#" style="flex:1"> <button onclick="sendRaw()">Send Raw</button>
+          </div>
+          <h3>Power</h3>
+          <div class="row">
+            <button onclick="sendPreset('pow_on')">Power On</button>
+            <button onclick="sendPreset('pow_off')">Power Off</button>
+            <!--- <button onclick="sendPreset('pow_status')">Power Status</button> -->
+          </div>
+
+          <h3>Source</h3>
+          <div class="row">
+            <button onclick="sendPreset('sour_rgb')">Computer (VGA)</button>
+            <button onclick="sendPreset('sour_hdmi')">HDMI</button>
+            <button onclick="sendPreset('sour_dvid')">DVI</button>
+            <button onclick="sendPreset('sour_vid')">Composite</button>
+          </div>
+
+          <h3>Menu / Navigation</h3>
+              <div class="row">
+                  <button onclick="sendPreset('menu_on')">Menu On</button>
+                  <button onclick="sendPreset('menu_off')">Menu Off</button>
+                  <div><button onclick="sendPreset('enter')">Enter</button></div>
+                  
+              </div>
+
+              <!-- Arrow-key style navigation grid -->
+              <div class="nav-pad" role="group" aria-label="navigation pad">
+                <div></div>
+                <div><button onclick="sendPreset('up')">Up</button></div>
+                <div></div>
+
+                <div><button onclick="sendPreset('left')">Left</button></div>
+                <div><button onclick="sendPreset('down')">Down</button></div>
+                <div><button onclick="sendPreset('right')">Right</button></div>
+              </div>
+        </div>
       </div>
+
+      <div class="right">
+        <div class="panel">
+          <h3>Response Log</h3>
+          <div id="log"></div>
+        </div>
       </div>
-  <div class="panel">
-      <div class="row">
-      <input id="rawcmd" placeholder="Type raw command like *pow=?#" style="flex:1"> <button onclick="sendRaw()">Send Raw</button>
     </div>
-    <h3>Power</h3>
-    <div class="row">
-      <button onclick="sendPreset('pow_on')">Power On</button>
-      <button onclick="sendPreset('pow_off')">Power Off</button>
-      <button onclick="sendPreset('pow_status')">Power Status</button>
-    </div>
-
-    <h3>Source</h3>
-    <div class="row">
-      <button onclick="sendPreset('sour_rgb')">Computer</button>
-      <button onclick="sendPreset('sour_hdmi')">HDMI</button>
-      <button onclick="sendPreset('sour_dvid')">DVI</button>
-      <button onclick="sendPreset('sour_vid')">Composite</button>
-    </div>
-
-
-    <h3>Menu / Navigation</h3>
-    <div class="row">
-      <button onclick="sendPreset('menu_on')">Menu On</button>
-      <button onclick="sendPreset('menu_off')">Menu Off</button>
-      <button onclick="sendPreset('menu_status')">Menu ?</button>
-    </div>
-    <div class="row">
-      <button onclick="sendPreset('up')">Up</button>
-      <button onclick="sendPreset('down')">Down</button>
-      <button onclick="sendPreset('left')">Left</button>
-      <button onclick="sendPreset('right')">Right</button>
-      <button onclick="sendPreset('enter')">Enter</button>
-    </div>
-
-    <!-- Raw command input retained for advanced control -->
-
-
-
     
 
-  </div>
-
-  <div class="panel">
-    <h3>Response Log</h3>
-    <div id="log"></div>
   </div>
 
   <!-- Manual screenshot panel removed -->
