@@ -1,0 +1,12 @@
+[project]
+name = "controlleur_projecteur"
+version = "0.1.0"
+description = "BenQ MW853UST local web UI"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+  "flask>=2.0"
+]
+
+[tool.uv]
+# UV will manage the venv for this project

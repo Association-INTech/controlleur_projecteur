@@ -1,0 +1,14 @@
+# Ignore Python bytecode caches anywhere in the tree
+__pycache__/
+**/__pycache__/
+
+# Ignore compiled Python files
+*.py[cod]
+
+# Common virtualenv / env folders
+.venv/
+venv/
+env/
+
+# Editor directories
+.vscode/
