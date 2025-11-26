@@ -27,13 +27,14 @@ Uploaded image path (for your environment to convert):
 /mnt/data/fc693af6-c529-46d0-9e08-1dff2300ad99.png
 """
 
-from flask import Flask, request, jsonify, render_template_string
+from flask import Flask, request, jsonify, render_template_string, send_from_directory
+import os
 import socket
 import threading
 import time
 
 # Configuration - change projector_ip to your projector's IP or leave blank to configure in UI
-PROJECTOR_IP = "192.168.1.155"  # default, update as needed
+PROJECTOR_IP = "192.168.1.5"  # default, update as needed
 PROJECTOR_PORT = 8000
 TCP_TIMEOUT = 2.0  # seconds to wait for response
 SEND_LEADING_TRAILING_CR = False  # if True, will wrap commands with \r on both sides
@@ -53,27 +54,6 @@ COMMAND_MAP = {
     "sour_vid": "*sour=vid#",
     "sour_hdbaset": "*sour=hdbaset#",
     "sour_dp": "*sour=dp#",
-    "sour_usbdisplay": "*sour=usbdisplay#",
-    "sour_network": "*sour=network#",
-    "sour_usbreader": "*sour=usbreader#",
-    # Picture modes
-    "app_dynamic": "*appmod=dynamic#",
-    "app_preset": "*appmod=preset#",
-    "app_cine": "*appmod=cine#",
-    "app_std": "*appmod=std#",
-    "app_bright": "*appmod=bright#",
-    "app_srgb": "*appmod=srgb#",
-    "app_game": "*appmod=game#",
-    # Brightness/Contrast adjustments (increment/decrement)
-    "bri_plus": "*bri=+#",
-    "bri_minus": "*bri=-#",
-    "bri_status": "*bri=?#",
-    "con_plus": "*con=+#",
-    "con_minus": "*con=-#",
-    "con_status": "*con=?#",
-    # Lamp and info
-    "ltim": "*ltim=?#",
-    "modelname": "*modelname=?#",
     # Common navigation
     "menu_on": "*menu=on#",
     "menu_off": "*menu=off#",
@@ -82,22 +62,7 @@ COMMAND_MAP = {
     "up": "*up#",
     "down": "*down#",
     "left": "*left#",
-    "right": "*right#",
-    # Keystone
-    "keyst_plus": "*keyst=+#",
-    "keyst_minus": "*keyst=-#",
-    "keyst_status": "*keyst=?#",
-    # Lens shift (lst) and optical controls
-    "lst_up": "*lst=up#",
-    "lst_down": "*lst=down#",
-    "lst_left": "*lst=left#",
-    "lst_right": "*lst=right#",
-    # Focus
-    "focus_plus": "*focus=+#",
-    "focus_minus": "*focus=-#",
-    # Zoom
-    "zoom_plus": "*zoom=+#",
-    "zoom_minus": "*zoom=-#",
+    "right": "*right#"
 }
 
 # Helper: send a single command and return projector response (string)
@@ -164,8 +129,16 @@ INDEX_HTML = """
     <label><input type="checkbox" id="wrapcr"> Wrap with CR</label>
     <button id="savecfg">Save</button>
   </div>
-
+    <div class="panel">
+      <h3>Documentation</h3>
+      <div class="row">
+        <a href="/manual.pdf"><button>Download RS232 Control Guide (PDF)</button></a>
+      </div>
+      </div>
   <div class="panel">
+      <div class="row">
+      <input id="rawcmd" placeholder="Type raw command like *pow=?#" style="flex:1"> <button onclick="sendRaw()">Send Raw</button>
+    </div>
     <h3>Power</h3>
     <div class="row">
       <button onclick="sendPreset('pow_on')">Power On</button>
@@ -181,25 +154,6 @@ INDEX_HTML = """
       <button onclick="sendPreset('sour_vid')">Composite</button>
     </div>
 
-    <h3>Picture</h3>
-    <div class="row">
-      <button onclick="sendPreset('app_preset')">Presentation</button>
-      <button onclick="sendPreset('app_cine')">Cinema</button>
-      <button onclick="sendPreset('app_std')">Standard</button>
-    </div>
-
-    <h3>Adjust</h3>
-    <div class="row">
-      <button onclick="sendPreset('bri_plus')">Brightness +</button>
-      <button onclick="sendPreset('bri_minus')">Brightness -</button>
-      <button onclick="sendPreset('bri_status')">Brightness ?</button>
-    </div>
-
-    <h3>Info</h3>
-    <div class="row">
-      <button onclick="sendPreset('ltim')">Lamp Hours</button>
-      <button onclick="sendPreset('modelname')">Model Name</button>
-    </div>
 
     <h3>Menu / Navigation</h3>
     <div class="row">
@@ -215,30 +169,12 @@ INDEX_HTML = """
       <button onclick="sendPreset('enter')">Enter</button>
     </div>
 
-    <div class="panel">
-      <h3>Lens &amp; Optics</h3>
-      <div class="row">
-        <button onclick="sendPreset('lst_up')">Lens Shift Up</button>
-        <button onclick="sendPreset('lst_down')">Lens Shift Down</button>
-        <button onclick="sendPreset('lst_left')">Lens Shift Left</button>
-        <button onclick="sendPreset('lst_right')">Lens Shift Right</button>
-      </div>
-      <div class="row">
-        <button onclick="sendPreset('focus_plus')">Focus +</button>
-        <button onclick="sendPreset('focus_minus')">Focus -</button>
-        <button onclick="sendPreset('zoom_plus')">Zoom +</button>
-        <button onclick="sendPreset('zoom_minus')">Zoom -</button>
-      </div>
-      <div class="row">
-        <button onclick="sendPreset('keyst_minus')">Keystone -</button>
-        <button onclick="sendPreset('keyst_plus')">Keystone +</button>
-        <button onclick="sendPreset('keyst_status')">Keystone ?</button>
-      </div>
-    </div>
+    <!-- Raw command input retained for advanced control -->
 
-    <div class="row">
-      <input id="rawcmd" placeholder="Type raw command like *pow=?#"> <button onclick="sendRaw()">Send Raw</button>
-    </div>
+
+
+    
+
   </div>
 
   <div class="panel">
@@ -310,9 +246,41 @@ async function sendRaw(){
     appendLog('Fetch error: ' + err);
   }
 }
+
 // Expose functions to global scope for inline `onclick` handlers
 window.sendPreset = sendPreset;
 window.sendRaw = sendRaw;
+
+// Keyboard support: capture arrow keys and Enter to navigate the menu
+window.addEventListener('keydown', function(e){
+  // Ignore when typing in inputs or editable elements
+  const active = document.activeElement;
+  if (active && (active.tagName === 'INPUT' || active.tagName === 'TEXTAREA' || active.isContentEditable)) return;
+
+  // Debug: surface key presses to the on-page log and console for easier troubleshooting
+  try{ appendLog('Keydown: ' + e.key); }catch(_){ /* noop if log not present */ }
+  console.debug && console.debug('BenQ: keydown', e.key, 'active=', active && active.tagName);
+
+  const key = e.key;
+  switch(key){
+    case 'ArrowUp':
+    case 'Up':
+      e.preventDefault(); sendPreset('up'); break;
+    case 'ArrowDown':
+    case 'Down':
+      e.preventDefault(); sendPreset('down'); break;
+    case 'ArrowLeft':
+    case 'Left':
+      e.preventDefault(); sendPreset('left'); break;
+    case 'ArrowRight':
+    case 'Right':
+      e.preventDefault(); sendPreset('right'); break;
+    case 'Enter':
+      e.preventDefault(); sendPreset('enter'); break;
+    default:
+      break;
+  }
+});
 </script>
 </body>
 </html>
@@ -373,6 +341,18 @@ def api_ping():
 def favicon():
   # No favicon provided — return 204 No Content to avoid 404 noise
   return ('', 204)
+
+
+@app.route('/manual.pdf')
+def manual_pdf():
+  """Serve the RS232 control PDF located next to this script."""
+  filename = "RS232 Control Guide_0_Windows7_Windows8_WinXP.pdf"
+  dirpath = os.path.dirname(__file__)
+  full = os.path.join(dirpath, filename)
+  if not os.path.exists(full):
+    app.logger.info('manual_pdf: file not found %s', full)
+    return jsonify({'error': 'manual not found on server'}), 404
+  return send_from_directory(dirpath, filename, as_attachment=True)
 
 
 if __name__ == '__main__':
