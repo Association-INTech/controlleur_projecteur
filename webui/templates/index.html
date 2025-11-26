@@ -101,10 +101,8 @@
 
   <!-- Manual screenshot panel removed -->
 
-<script>
-  // Pass server defaults into client before loading app.js
-  window.DEFAULTS = { ip: "{{ default_ip }}", port: {{ default_port }} };
-</script>
+<!-- Pass server defaults into client as JSON to avoid JS/parser conflicts in editors -->
+<script id="DEFAULTS" type="application/json">{{ {"ip": default_ip, "port": default_port} | tojson }}</script>
 <script src="{{ url_for('webui.static', filename='js/app.js') }}"></script>
 </body>
 </html>

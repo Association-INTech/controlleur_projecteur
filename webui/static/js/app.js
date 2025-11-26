@@ -1,3 +1,15 @@
+// read server-provided defaults from the JSON script block (id="DEFAULTS")
+(function(){
+  try{
+    const def = document.getElementById('DEFAULTS');
+    if(def && def.textContent){
+      window.DEFAULTS = JSON.parse(def.textContent);
+    }
+  }catch(e){
+    window.DEFAULTS = window.DEFAULTS || { ip: '127.0.0.1', port: 8000 };
+  }
+})();
+
 function appendLog(text){
   const el = document.getElementById('log');
   const now = new Date().toLocaleTimeString();
@@ -70,6 +82,8 @@ async function sendRaw(){
 
 // expose sendPreset globally for inline handlers
 window.sendPreset = sendPreset;
+// also expose sendRaw for convenience
+window.sendRaw = sendRaw;
 
 // keyboard handler
 window.addEventListener('keydown', function(e){
