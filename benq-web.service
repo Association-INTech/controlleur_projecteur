@@ -1,0 +1,14 @@
+[Unit]
+Description=BenQ MW853UST Web UI
+After=network.target
+
+[Service]
+Type=simple
+User=pi
+WorkingDirectory=/home/intech/controlleur_projecteur
+Environment=PATH=/home/intech/controlleur_projecteur/.venv/bin
+ExecStart=/home/intech/controlleur_projecteur/.venv/bin/gunicorn --bind 0.0.0.0:5000 --workers 1 Benq_Mw853ust_Webui:app
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
