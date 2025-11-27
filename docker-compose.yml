@@ -1,0 +1,12 @@
+version: '3.8'
+services:
+  web:
+    build: .
+    ports:
+      - "5000:5000"
+    environment:
+      - PYTHONUNBUFFERED=1
+    # Use a named volume or bind mount during development to pick up changes
+    volumes:
+      - .:/app:delegated
+    restart: unless-stopped
