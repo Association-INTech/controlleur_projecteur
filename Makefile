@@ -41,6 +41,14 @@ logs:
 shell:
 	docker-compose exec web /bin/bash
 
+# uv helpers for local development
+.PHONY: uv-sync uv-run
+uv-sync:
+	uv sync
+
+uv-run:
+	uv run Benq_Mw853ust_Webui.py
+
 clean:
 	- docker rm -f $(CONTAINER) 2>/dev/null || true
 	- docker rmi $(IMAGE) 2>/dev/null || true

@@ -21,16 +21,19 @@ python3 -m venv .venv
 source .venv/bin/activate
 ```
 
-- Install dependencies:
+
+- Install dependencies (recommended with `uv`):
 
 ```bash
-pip install -r requirements.txt || pip install flask
+# sync dependencies declared in `pyproject.toml`
+uv sync
 ```
 
-- Run the app:
+- Run the app (recommended via `uv`):
 
 ```bash
-python Benq_Mw853ust_Webui.py
+uv run Benq_Mw853ust_Webui.py
+# fallback: `python Benq_Mw853ust_Webui.py`
 ```
 
 The app listens on `http://0.0.0.0:5000/` by default.

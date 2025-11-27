@@ -13,8 +13,14 @@ RUN apt-get update \
 # Copy project metadata so we can leverage caching for installs
 COPY pyproject.toml /app/
 
-# Install runtime dependencies. We include gunicorn for production serving.
-RUN pip install --no-cache-dir flask gunicorn
+# Install runtime dependencies using `uv` (reads `pyproject.toml`) and ensure
+# `gunicorn` is available for production serving.
+RUN pip install --no-cache-dir uv \
+    && uv sync
+
+# Ensure `uv`'s created virtualenv (commonly `.venv`) is on PATH so installed
+# packages (Flask, gunicorn) are discoverable by the runtime `gunicorn` binary.
+ENV PATH="/app/.venv/bin:${PATH}"
 
 # Copy application source
 COPY . /app
