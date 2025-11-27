@@ -19,5 +19,6 @@ docker-compose up --build
 ```
 
 Notes:
+
 - The app listens on port `5000` inside the container and is published to the same host port by default.
 - The `docker-compose` setup mounts the project into the container so code changes are visible without rebuilding.
