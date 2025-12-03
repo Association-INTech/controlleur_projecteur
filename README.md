@@ -26,14 +26,15 @@ source .venv/bin/activate
 pip install --upgrade pip
 pip install -r requirements.txt
 ```
+
 > Step 1 and 2 can be done in one step with `make install` (see Makefile section below).
 
-
-3.  Run directly with Python for quick debugging:
+3. Run directly with Python for quick debugging:
 
 ```bash
 python Benq_Mw853ust_Webui.py
 ```
+
 > This step can be done with `make run-debug` (see Makefile section below).
 
 4. Run with Gunicorn for production use and final debugging:
@@ -42,6 +43,7 @@ python Benq_Mw853ust_Webui.py
 # from project root with venv activated
 ./.venv/bin/gunicorn --bind 0.0.0.0:5000 --workers 1 Benq_Mw853ust_Webui:app
 ```
+
 > This step can be done with `make run` (see Makefile section below).
 
 ## Systemd service (auto-start on boot)
