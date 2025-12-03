@@ -4,7 +4,7 @@ After=network.target
 
 [Service]
 Type=simple
-User=pi
+User=intech
 WorkingDirectory=/home/intech/controlleur_projecteur
 Environment=PATH=/home/intech/controlleur_projecteur/.venv/bin
 ExecStart=/home/intech/controlleur_projecteur/.venv/bin/gunicorn --bind 0.0.0.0:5000 --workers 1 Benq_Mw853ust_Webui:app

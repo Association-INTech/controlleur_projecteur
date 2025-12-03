@@ -11,7 +11,7 @@ BenQ MW853UST local Web UI — a small Flask app to control a projector on a loc
 
 - Python 3.11+
 
-## Run locally (recommended for Raspberry Pi or small devices)
+## Run manually
 
 1. Create and activate a virtual environment from the project root:
 
@@ -26,7 +26,7 @@ source .venv/bin/activate
 pip install --upgrade pip
 pip install -r requirements.txt
 ```
-
+> Step 1 and 2 can be done in one step with `make install` (see Makefile section below).
 
 
 3.  Run directly with Python for quick debugging:
@@ -34,15 +34,17 @@ pip install -r requirements.txt
 ```bash
 python Benq_Mw853ust_Webui.py
 ```
+> This step can be done with `make run-debug` (see Makefile section below).
 
-4. Run with Gunicorn for production use and final debuging:
+4. Run with Gunicorn for production use and final debugging:
 
 ```bash
 # from project root with venv activated
 ./.venv/bin/gunicorn --bind 0.0.0.0:5000 --workers 1 Benq_Mw853ust_Webui:app
 ```
+> This step can be done with `make run` (see Makefile section below).
 
-## Systemd service (recommended on the Pi)
+## Systemd service (auto-start on boot)
 
 Create a service file (example provided as `benq-web.service` in the repo). Copy it to `/etc/systemd/system/` and then enable & start:
 
@@ -54,6 +56,8 @@ sudo journalctl -u benq-web -f
 ```
 
 Edit the `benq-web.service` file to set the correct `User` and `WorkingDirectory` for your system.
+
+> These steps can be done by executing sequentially `make service-install`, `make service-start`, and `make service-status` (see Makefile section below).
 
 ## Makefile
 
